@@ -1,17 +1,8 @@
 import React from 'react';
 import BooksShelf from './BooksShelf.js';
 import {Link} from 'react-router-dom';
-import * as BooksAPI from '../BooksAPI';
 
-class MyReads extends  React.Component{
-
-  updateShelf = (book,shelfname)=>{
-    BooksAPI.update(book,{shelf:shelfname}).then(()=>{
-      this.props.getAll();
-    })
-  };
-
-  render(){
+const MyReads = (props)=> {
     return (
       <div className="app">
         <div className="list-books">
@@ -20,7 +11,7 @@ class MyReads extends  React.Component{
           </div>
           <div className="list-books-content">
             <div>
-              <BooksShelf bookShelfs = {this.props.shelfs} update = {this.updateShelf}/>
+              <BooksShelf bookShelfs = {props.shelfs} update = {props.update}/>
             </div>
           </div>
           <div className="open-search">
@@ -29,7 +20,7 @@ class MyReads extends  React.Component{
         </div>
       </div>
     );
-  }
+
 }
 
 export default MyReads;

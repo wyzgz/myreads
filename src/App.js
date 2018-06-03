@@ -1,5 +1,4 @@
 import React from 'react'
-// import * as BooksAPI from './BooksAPI'
 import {Route} from 'react-router-dom';
 import BooksAppSample from './sample.js';
 import BookSearch from './Component/BookSearch.js';
@@ -18,10 +17,63 @@ class BooksApp extends React.Component{
   componentDidMount(){
     this.getAll();
   }
+  addToShelf = (book,shelf)=>{
+    this.setState(currentState => {
+      let shelfs = currentState.bookShelfs;
+      shelfs[shelf].push(book);
+      return {bookShelfs: shelfs};
+    });
+  };
+  addToAllList = book => {
+    this.setState (currentState => {
+      let allList = currentState.allBookList;
+      allList.push(book);
+      return {allBookList:allList};
+    });
+  };
+  removeFromShelf =(book,shelf)=>{
+    this.setState((currentState)=>{
+      let prevShelfs = currentState.bookShelfs;
+      let newList = prevShelfs[shelf].filter(bookInShelf => bookInShelf.id !== book.id);
+      prevShelfs[shelf] = newList;
+      return {bookShelfs:prevShelfs};
+    });
+  };
+  removeFromAllList = (book) => {
+    this.setState(currentState => {
+      let list = currentState.allBookList.filter(bookInlist => bookInlist.id !== book.id);
+      return {allBookList:list};
+    })
+  };
+  removeFromAll = (book,prevShelf)=> {
+    this.removeFromShelf(book,prevShelf);
+    this.removeFromAllList(book);
+  };
+  addToAll = (book,newShelf) => {
+    this.addToShelf(book,newShelf);
+    this.addToAllList(book);
+  };
+  moveBeTShelf = (book,prevShelf,newShelf) => {
+    this.removeFromShelf(book,prevShelf);
+    this.addToShelf(book,newShelf);
+  };
+  update = (book,prevShelf,newShelf) => {
+    BooksAPI.update(book,{shelf:newShelf}).then(()=>{
+      if(book && prevShelf && newShelf){
+        if(newShelf === 'none'){
+          this.removeFromAll(book,prevShelf);
+        }else{
+          this.moveBeTShelf(book,prevShelf,newShelf);
+        }
+      }else if(book && newShelf){
+        this.addToAll(book,newShelf);
+      }
+    });
+  };
 
   getAll = ()=>{
     BooksAPI.getAll().then(data=>{
-      this.setState(currentState=>({allBookList:data}));
+      this.setState(()=>({allBookList:data}));
       this.refreshShelf(data);
     });
   };
@@ -34,7 +86,7 @@ class BooksApp extends React.Component{
       wantToRead : wantToRead,
       read: read
     }
-    this.setState(currentState=>({bookShelfs:bookShelfs}));
+    this.setState(()=>({bookShelfs:bookShelfs}));
 
   };
 
@@ -46,13 +98,13 @@ class BooksApp extends React.Component{
         <Route exact path ='/' render = {()=>(
           <MyReads
             shelfs ={this.state.bookShelfs}
-            getAll = {this.getAll}
+            update = {this.update}
           />
         )}/>
         <Route path ='/search' render ={()=>(
           <BookSearch
-            getAll = {this.getAll}
             shelfs = {this.state.allBookList}
+            update = {this.update}
             />
         )}/>
       </div>

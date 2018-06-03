@@ -23,9 +23,6 @@ class BookSearch extends React.Component{
     })
   };
 
-  updateShelf = (book,shelfname)=>{
-    BooksAPI.update(book,{shelf:shelfname}).then(this.props.getAll());
-  }
   render(){
     const bookList = this.state.searchResult?this.state.searchResult:[];
     return (
@@ -35,7 +32,7 @@ class BookSearch extends React.Component{
           </div>
           <div className="search-books-results">
            { (bookList && bookList.length>0) &&
-             <BookList bookList = {bookList} update = {this.updateShelf}/>
+             <BookList bookList = {bookList} update = {this.props.update}/>
            }
           </div>
       </div>
